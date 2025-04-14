@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ScheduleDialog</class>
+ <widget class="QWidget" name="ScheduleDialog">
+  <property name="windowTitle">
+   <string>일정 추가</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelTitle">
+       <property name="text">
+        <string>제목:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineEditTitle"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelLocation">
+       <property name="text">
+        <string>장소:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="lineEditLocation"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelTime">
+       <property name="text">
+        <string>시간:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QTimeEdit" name="timeEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="input_button">
+     <property name="text">
+      <string>추가</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

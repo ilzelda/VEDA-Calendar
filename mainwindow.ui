@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowTitle">
+   <string>일정관리 프로그램</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <!-- 월 전환 버튼 및 현재 월 표시 -->
+    <item>
+     <layout class="QHBoxLayout" name="monthNavigationLayout">
+      <item>
+       <widget class="QPushButton" name="shift_left">
+        <property name="text">
+         <string>&lt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="monthLabel">
+        <property name="text">
+         <string>2025-04</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="shift_right">
+        <property name="text">
+         <string>&gt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <!-- 캘린더 그리드 (날짜 버튼들이 동적으로 생성됨) -->
+    <item>
+     <widget class="QWidget" name="calendarWidget">
+      <layout class="QGridLayout" name="gridLayout">
+       <!-- 날짜 버튼들은 코드에서 생성하여 addWidget() -->
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
