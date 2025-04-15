@@ -7,6 +7,7 @@
 ListDialog::ListDialog(QWidget *parent, const QDate &date)
     : QDialog(parent)
     , selectedDate(date)
+    , main_window(qobject_cast<MainWindow*>(parent))
     , sch_map(qobject_cast<MainWindow*>(parent)->scheduleMap)
     , ui(new Ui::ListDialog)
 {
@@ -17,10 +18,10 @@ ListDialog::ListDialog(QWidget *parent, const QDate &date)
     for(int idx = 0; idx<_sch_list.size(); idx++)
     {
         Schedule& _sch = _sch_list[idx];
-        createTodoItemWidget(_sch.title, _sch.location, _sch.start, _sch.end);
+        createTodoItemWidget(_sch/*_sch.title, _sch.location, _sch.start, _sch.end*/);
     }
 
-    connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::addListLine);
+    connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::emitSignalAddListButtonClicked);
 }
 
 ListDialog::~ListDialog()
@@ -28,27 +29,23 @@ ListDialog::~ListDialog()
     delete ui;
 }
 
-void ListDialog::addListLine()
+void ListDialog::emitSignalAddListButtonClicked()
 {
-    emit callDayWidgetClicked(selectedDate);
+    emit addListButtonClicked(selectedDate);
 }
 
-QWidget* ListDialog::createTodoItemWidget(
-                                          const QString &title,
-                                          const QString &location,
-                                          const QDateTime &start,
-                                          const QDateTime &end)
+QWidget* ListDialog::createTodoItemWidget(Schedule _sch)
 {
     QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
     QWidget* container = new QWidget(this);
     QHBoxLayout* mainLayout = new QHBoxLayout(container);
 
-    QLabel* titleLabel = new QLabel(QString("제목: %1").arg(title), container);
-    QLabel* locationLabel = new QLabel(QString("장소: %1").arg(location), container);
+    QLabel* titleLabel = new QLabel(QString("제목: %1").arg(_sch.title), container);
+    QLabel* locationLabel = new QLabel(QString("장소: %1").arg(_sch.location), container);
     QLabel* timeLabel = new QLabel(
         QString("시간: %1 ~ %2")
-            .arg(start.toString("yyyy-MM-dd hh:mm"))
-            .arg(end.toString("yyyy-MM-dd hh:mm")),
+            .arg(_sch.start.toString("yyyy-MM-dd hh:mm"))
+            .arg(_sch.end.toString("yyyy-MM-dd hh:mm")),
         container
         );
 
@@ -79,14 +76,41 @@ QWidget* ListDialog::createTodoItemWidget(
         QList<Schedule>& scheduleList = sch_map[selectedDate];
         for (int i = 0; i < scheduleList.size(); ++i) {
             const Schedule &sch = scheduleList[i];
-            if (sch.title == title &&
-                sch.location == location &&
-                sch.start == start &&
-                sch.end == end)
+            if (sch.title == _sch.title &&
+                sch.location == _sch.location &&
+                sch.start == _sch.start &&
+                sch.end == _sch.end)
             {
                 scheduleList.removeAt(i);
                 break;
             }
+        }
+    });
+
+    connect(editButton, &QPushButton::clicked, this, [=](){
+       //emitSignalAddListButtonClicked()
+        //(우리가 원하는 값들 <-_sch) >> showScheduleDialogForUpdated인자값
+        QString currentTitle = titleLabel->text().mid(4);
+        QString currentLocation = locationLabel->text().mid(4);
+        QDateTime currentStart = _sch.start;
+        QDateTime currentEnd = _sch.end;
+        qDebug() << "new Title : " << currentTitle;
+        // Schedule 객체 생성
+        Schedule currentSchedule;
+        currentSchedule.title = currentTitle;
+        currentSchedule.location = currentLocation;
+        currentSchedule.start = currentStart;
+        currentSchedule.end = currentEnd;
+
+        Schedule newSch = qobject_cast<MainWindow*>(main_window)->showScheduleDialogForUpdate(this, currentSchedule);
+        if(newSch.title.size() > 0)
+        {
+            // 수정된 Schedule 값을 반영해서 라벨 텍스트 업데이트
+            titleLabel->setText(QString("제목: %1").arg(newSch.title));
+            locationLabel->setText(QString("장소: %1").arg(newSch.location));
+            timeLabel->setText(QString("시간: %1 ~ %2")
+                                   .arg(newSch.start.toString("yyyy-MM-dd hh:mm"))
+                                   .arg(newSch.end.toString("yyyy-MM-dd hh:mm")));
         }
     });
 
