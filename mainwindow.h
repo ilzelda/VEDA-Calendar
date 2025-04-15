@@ -5,6 +5,7 @@
 #include <QDate>
 #include <QMap>
 #include <QList>
+#include "Schedule.h"
 
 #include "weekbox.h"
 #include "Schedule.h"
@@ -23,8 +24,12 @@ public:
 private slots:
     void onShiftLeftClicked();
     void onShiftRightClicked();
-    void dayButtonClicked();
+    //void dayButtonClicked();
     void addSchedule(Schedule newSchedule);
+
+    //새로운 슬롯 추가 17:05 daywidget
+    void dayWidgetClicked(const QDate &date);
+    void dayListAddClicked(const QDate &selectedDate);
 
 private:
     void updateCalendar();

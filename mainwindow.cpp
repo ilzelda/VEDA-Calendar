@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "scheduledialog.h"
+#include "daywidget.h"
+#include "Schedule.h"
+#include "listdialog.h"
 
 #include <QPushButton>
 #include <QDebug>
@@ -26,11 +29,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::updateCalendar()
 {
     ui->monthLabel->setText(currentMonth.toString("yyyy-MM"));
 
-    // 기존에 생성된 날짜 버튼 제거
+    // 기존 버튼 제거
     QLayoutItem* item;
     while((item = ui->gridLayout->takeAt(0)) != nullptr) {
         if(item->widget())
@@ -40,15 +44,14 @@ void MainWindow::updateCalendar()
 
     int days = currentMonth.daysInMonth();
     int row = 0, column = 0;
-    // 단순 7열 그리드로 날짜 버튼 생성
-    for (int day = 1; day <= days; day++) {
-        QPushButton *dayButton = new QPushButton(QString::number(day));
-        QDate dayDate(currentMonth.year(), currentMonth.month(), day);
-        dayButton->setProperty("date", dayDate);
-        // 버튼 클릭 시 dayButtonClicked 슬롯 호출
-        connect(dayButton, &QPushButton::clicked, this, &MainWindow::dayButtonClicked);
 
-        ui->gridLayout->addWidget(dayButton, row, column);
+    for (int day = 1; day <= days; day++) {
+        QDate dayDate(currentMonth.year(), currentMonth.month(), day);
+        DayWidget *dayWidget = new DayWidget(dayDate);
+
+        connect(dayWidget, &DayWidget::clicked, this, &MainWindow::dayListAddClicked);
+
+        ui->gridLayout->addWidget(dayWidget, row, column);
         column++;
         if (column >= 7) {
             column = 0;
@@ -86,6 +89,7 @@ void MainWindow::updateCalendar()
     }
 }
 
+
 void MainWindow::onShiftLeftClicked()
 {
     currentMonth = currentMonth.addMonths(-1);
@@ -100,21 +104,38 @@ void MainWindow::onShiftRightClicked()
     updateCalendar();
 }
 
-void MainWindow::dayButtonClicked()
-{
-    // 클릭된 버튼에서 날짜 정보 읽어옴
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if(!button)
-        return;
-    QDate selectedDate = button->property("date").toDate();
 
-    // 일정 추가 다이얼로그 실행 (모달)
+// void MainWindow::dayButtonClicked()
+// {
+//     QPushButton *button = qobject_cast<QPushButton*>(sender());
+//     if (!button) return;
+
+//     QDate selectedDate = button->property("date").toDate();
+//     ScheduleDialog dlg(this, selectedDate);
+//     if (dlg.exec() == QDialog::Accepted) {
+//         Schedule newSchedule = dlg.getSchedule();
+//         addSchedule(newSchedule);
+//         qDebug() << "추가된 일정:" << newSchedule.date << newSchedule.title;
+//     }
+// }
+
+void MainWindow::dayListAddClicked(const QDate &selectedDate)
+{
+    ListDialog dlg(this);  // 부모 지정
+    dlg.setWindowTitle(selectedDate.toString("yyyy-MM-dd"));  // 선택된 날짜로 타이틀 설정 (선택사항)
+    dlg.exec();  // 모달로 실행
+}
+
+
+void MainWindow::dayWidgetClicked(const QDate &selectedDate)
+{
     ScheduleDialog dlg(this, selectedDate);
     if (dlg.exec() == QDialog::Accepted) {
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
     }
 }
+
 
 void MainWindow::addSchedule(Schedule newSchedule)
 {
@@ -139,6 +160,7 @@ void MainWindow::addSchedule(Schedule newSchedule)
         weekbox_list[idx]->show();
     }
 }
+
 
 void MainWindow::showEvent(QShowEvent *event)
 {
