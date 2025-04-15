@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QDate>
-#include "mainwindow.h"  // Schedule 구조체 포함
+#include "Schedule.h"
 
 namespace Ui {
 class ScheduleDialog;
