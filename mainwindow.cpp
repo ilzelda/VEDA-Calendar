@@ -29,7 +29,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::updateCalendar()
 {
     ui->monthLabel->setText(currentMonth.toString("yyyy-MM"));
@@ -50,7 +49,6 @@ void MainWindow::updateCalendar()
         DayWidget *dayWidget = new DayWidget(dayDate);
 
         connect(dayWidget, &DayWidget::clicked, this, &MainWindow::dayListAddClicked);
-
         ui->gridLayout->addWidget(dayWidget, row, column);
         column++;
         if (column >= 7) {
@@ -121,11 +119,21 @@ void MainWindow::onShiftRightClicked()
 
 void MainWindow::dayListAddClicked(const QDate &selectedDate)
 {
-    ListDialog dlg(this);  // 부모 지정
+    //ListDialog dlg(this);  // 부모 지정
+    ListDialog dlg(this, selectedDate);
     dlg.setWindowTitle(selectedDate.toString("yyyy-MM-dd"));  // 선택된 날짜로 타이틀 설정 (선택사항)
-    dlg.exec();  // 모달로 실행
-}
 
+    //dayWidgetClicked connect해주기 slot,signal
+    //connect(dlg,&listdialog,)
+    //connect(&dlg, &QPushButton::clicked, this, &MainWindow::dayWidgetClicked);
+    //커스텀 시그널을 만들어서 emit을 통해 dayWidgetClicked 호출
+    //listdialog에서 "할 일 추가" 버튼을 누르면 addListLine 실행 addListLine은
+    // callDayWidgetClicked를 emit한다 그러면 아래의 connect문을 통해 dayWidgetClicked가 실행된다.
+    connect(&dlg, &ListDialog::callDayWidgetClicked, this, &MainWindow::dayWidgetClicked);
+
+
+    dlg.exec();
+}
 
 void MainWindow::dayWidgetClicked(const QDate &selectedDate)
 {
@@ -133,6 +141,9 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
     if (dlg.exec() == QDialog::Accepted) {
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
+      
+       qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
+
     }
 }
 
@@ -181,4 +192,3 @@ void MainWindow::resizeEvent(QResizeEvent *event)
         weekbox_list[idx]->show();
     }
 }
-

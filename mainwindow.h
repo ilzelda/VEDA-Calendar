@@ -6,9 +6,7 @@
 #include <QMap>
 #include <QList>
 #include "Schedule.h"
-
 #include "weekbox.h"
-#include "Schedule.h"
 
 namespace Ui {
 class MainWindow;

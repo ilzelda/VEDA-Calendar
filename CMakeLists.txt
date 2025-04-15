@@ -24,6 +24,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         scheduledialog.h scheduledialog.cpp scheduledialog.ui
+        daywidget.h daywidget.cpp daywidget.ui
+        listdialog.h listdialog.cpp listdialog.ui
+        Schedule.h
+
+
+
 
         daywidget.h daywidget.cpp daywidget.ui
         listdialog.h listdialog.cpp listdialog.ui

@@ -51,10 +51,11 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QDateTimeEdit" name="dateTimeEditStart"/>
-     </item>
-     <item row="3" column="1">
-      <widget class="QDateTimeEdit" name="dateTimeEditEnd"/>
+      <widget class="QDateTimeEdit" name="dateTimeEdit">
+       <property name="calendarPopup">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

@@ -4,7 +4,6 @@
 #include <QString>
 #include <QDateTime>
 
-
 struct Schedule {
     QString title;
     QString location;

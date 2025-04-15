@@ -1,11 +1,13 @@
 #include "scheduledialog.h"
 #include "ui_scheduledialog.h"
-
+// #include <QDateTime>
+// #include <QDate>
 ScheduleDialog::ScheduleDialog(QWidget *parent, const QDate &date) :
     QDialog(parent),
     ui(new Ui::ScheduleDialog)
 {
     ui->setupUi(this);
+
     QDateTime startDateTime;
     QDateTime endDateTime;
     startDateTime.setDate(date);
@@ -31,8 +33,10 @@ void ScheduleDialog::on_input_button_clicked()
 {
     schedule.title = ui->lineEditTitle->text();
     schedule.location = ui->lineEditLocation->text();
+
     schedule.start = ui->dateTimeEditStart->dateTime();
     schedule.end = ui->dateTimeEditEnd->dateTime();
+
     // 입력 후 다이얼로그 종료 (Accepted)
     accept();
 }
