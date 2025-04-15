@@ -67,24 +67,24 @@ void MainWindow::updateCalendar()
     qDeleteAll(weekbox_list);
     weekbox_list.clear();
 
-    // row의 수만큼 weekbox 생성
-    int n_row = row+1;
-    for(int r = 0; r <= n_row; r++)
-    {
-        WeekBox* weekbox = new WeekBox(r, container);
-        // weekbox의 위치와 크기를 원하는 대로 지정합니다.
-        // gridLayout에서 r번째 행의 영역에 맞게 위치시키기 위한 계산
-        int yPos = r * (container->height() / n_row);
-        weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
+    // // row의 수만큼 weekbox 생성
+    // int n_row = row+1;
+    // for(int r = 0; r <= n_row; r++)
+    // {
+    //     WeekBox* weekbox = new WeekBox(r, container);
+    //     // weekbox의 위치와 크기를 원하는 대로 지정합니다.
+    //     // gridLayout에서 r번째 행의 영역에 맞게 위치시키기 위한 계산
+    //     int yPos = r * (container->height() / n_row);
+    //     weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
 
-        // pushbutton들 위로 올리기 위해 raise() 호출
-        weekbox->raise();
+    //     // pushbutton들 위로 올리기 위해 raise() 호출
+    //     weekbox->raise();
 
-        weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
-        // weekbox->show();
+    //     weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
+    //     // weekbox->show();
 
-        weekbox_list.append(weekbox);
-    }
+    //     weekbox_list.append(weekbox);
+    // }
 }
 
 
@@ -141,8 +141,13 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
     if (dlg.exec() == QDialog::Accepted) {
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
-      
-       qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
+
+        qDebug() << "addSchedule(newSchedule)";
+
+        ListDialog* _listdialog = qobject_cast<ListDialog*>(sender());
+        _listdialog->createTodoItemWidget(newSchedule.title, newSchedule.location, newSchedule.start, newSchedule.end);
+
+        qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
 
     }
 }
@@ -150,6 +155,8 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
 
 void MainWindow::addSchedule(Schedule newSchedule)
 {
+    qDebug() << "inside addSchedule()";
+
     // scheduleMap 수정
     for (QDate date = newSchedule.start.date(); date <= newSchedule.end.date(); date = date.addDays(1)) {
         QList<Schedule> list = scheduleMap.value(date);
@@ -160,6 +167,8 @@ void MainWindow::addSchedule(Schedule newSchedule)
         // });
         scheduleMap[date] = list;
     }
+
+    qDebug() << "before modify weebox";
 
     // weekBox들 수정
     int wbl_idx_from = int((newSchedule.start.date().day()-1) / 7);

@@ -30,8 +30,13 @@ public:
     
     ~ListDialog();
 
+
+    QWidget* createTodoItemWidget(
+                                          const QString &title,
+                                          const QString &location,
+                                          const QDateTime &start,
+                                          const QDateTime &end);
 private:
-    QWidget* createTodoItemWidget(QListWidgetItem* item);
     QDate selectedDate; // dayListAddClicked에서 dayWidgetClicked를 호출할때 selectedDate 필요해서추가
 
 signals:

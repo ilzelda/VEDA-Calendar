@@ -22,7 +22,6 @@ public:
 private slots:
     void onShiftLeftClicked();
     void onShiftRightClicked();
-    //void dayButtonClicked();
     void addSchedule(Schedule newSchedule);
 
     //새로운 슬롯 추가 17:05 daywidget
