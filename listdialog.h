@@ -1,6 +1,7 @@
 #ifndef LISTDIALOG_H
 #define LISTDIALOG_H
 
+
 #include <QDate>
 #include <QApplication>
 #include <QWidget>
@@ -23,8 +24,10 @@ class ListDialog : public QDialog
     Q_OBJECT
 
 public:
+
     ListDialog(QWidget *parent = nullptr, const QDate &date = QDate::currentDate());
     //const QDate &date = QDate::currentDate() selected Date 받아오기 위해서
+    
     ~ListDialog();
 
 private:

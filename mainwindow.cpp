@@ -29,37 +29,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// void MainWindow::updateCalendar()
-// {
-//     ui->monthLabel->setText(currentMonth.toString("yyyy-MM"));
-
-//     // 기존에 생성된 날짜 버튼 제거
-//     QLayoutItem* item;
-//     while((item = ui->gridLayout->takeAt(0)) != nullptr) {
-//         if(item->widget())
-//             item->widget()->deleteLater();
-//         delete item;
-//     }
-
-//     int days = currentMonth.daysInMonth();
-//     int row = 0, column = 0;
-//     // 단순 7열 그리드로 날짜 버튼 생성
-//     for (int day = 1; day <= days; day++) {
-//         QPushButton *dayButton = new QPushButton(QString::number(day));
-//         QDate dayDate(currentMonth.year(), currentMonth.month(), day);
-//         dayButton->setProperty("date", dayDate);
-//         // 버튼 클릭 시 dayButtonClicked 슬롯 호출
-//         connect(dayButton, &QPushButton::clicked, this, &MainWindow::dayButtonClicked);
-
-//         ui->gridLayout->addWidget(dayButton, row, column);
-//         column++;
-//         if (column >= 7) {
-//             column = 0;
-//             row++;
-//         }
-//     }
-// }
-
 void MainWindow::updateCalendar()
 {
     ui->monthLabel->setText(currentMonth.toString("yyyy-MM"));
@@ -80,13 +49,41 @@ void MainWindow::updateCalendar()
         DayWidget *dayWidget = new DayWidget(dayDate);
 
         connect(dayWidget, &DayWidget::clicked, this, &MainWindow::dayListAddClicked);
-
         ui->gridLayout->addWidget(dayWidget, row, column);
         column++;
         if (column >= 7) {
             column = 0;
             row++;
         }
+    }
+
+    // qDebug() << "row :" << row;
+    // weekbox들을 gridLayout의 부모 위젯에 올리고, pushbutton들 위에 보이게 처리
+    // gridLayout의 부모 위젯을 가져옵니다. (예: ui->calendarWidget 등)
+    QWidget *container = ui->gridLayout->parentWidget();
+    // qDebug() << "container :" << "h:" << container->height() << "w:"<< container->width();
+
+    // 기존 weekbox 목록이 있다면 필요에 따라 삭제 후 새로 생성합니다.
+    qDeleteAll(weekbox_list);
+    weekbox_list.clear();
+
+    // row의 수만큼 weekbox 생성
+    int n_row = row+1;
+    for(int r = 0; r <= n_row; r++)
+    {
+        WeekBox* weekbox = new WeekBox(r, container);
+        // weekbox의 위치와 크기를 원하는 대로 지정합니다.
+        // gridLayout에서 r번째 행의 영역에 맞게 위치시키기 위한 계산
+        int yPos = r * (container->height() / n_row);
+        weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
+
+        // pushbutton들 위로 올리기 위해 raise() 호출
+        weekbox->raise();
+
+        weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
+        // weekbox->show();
+
+        weekbox_list.append(weekbox);
     }
 }
 
@@ -138,40 +135,60 @@ void MainWindow::dayListAddClicked(const QDate &selectedDate)
     dlg.exec();
 }
 
-
 void MainWindow::dayWidgetClicked(const QDate &selectedDate)
 {
     ScheduleDialog dlg(this, selectedDate);
     if (dlg.exec() == QDialog::Accepted) {
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
+      
        qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
+
     }
 }
 
 
 void MainWindow::addSchedule(Schedule newSchedule)
 {
-    QList<Schedule> list = scheduleMap.value(newSchedule.start.date());
-    list.append(newSchedule);
-    // 시간순으로 정렬
-     std::sort(list.begin(), list.end(), [](const Schedule &a, const Schedule &b){
-         return a.start.time() < b.start.time();
-    });
-    scheduleMap[newSchedule.start.date()] = list;
+    // scheduleMap 수정
+    for (QDate date = newSchedule.start.date(); date <= newSchedule.end.date(); date = date.addDays(1)) {
+        QList<Schedule> list = scheduleMap.value(date);
+        list.append(newSchedule);
+        // // 시간순으로 정렬
+        // std::sort(list.begin(), list.end(), [](const Schedule &a, const Schedule &b){
+        //     return a.time < b.time;
+        // });
+        scheduleMap[date] = list;
+    }
 
-    // 간단하게 해당 날짜 버튼 텍스트에 일정을 덧붙여 표시 (실제 구현에서는 schedule_bar 위젯 활용)
-    for (int i = 0; i < ui->gridLayout->count(); i++) {
-        QWidget *widget = ui->gridLayout->itemAt(i)->widget();
-        if (widget && widget->property("date").toDate() == newSchedule.start.date()) {
-            QString text = QString::number(newSchedule.start.date().day());
-            // 기존에 있던 일정 제목들을 덧붙임
-            for (const Schedule &sch : scheduleMap[newSchedule.start.date()]) {
-                text += "\n" + sch.title;
-            }
-            // widget->setText(text);
-        }
+    // weekBox들 수정
+    int wbl_idx_from = int((newSchedule.start.date().day()-1) / 7);
+    int wbl_idx_to = int((newSchedule.end.date().day()-1) / 7);
+    for(int idx=wbl_idx_from; idx<=wbl_idx_to; idx++)
+    {
+        weekbox_list[idx]->schedule_list.append(newSchedule);
+        qDebug() << "update " << idx << "th weekbox";
+        weekbox_list[idx]->show();
     }
 }
 
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+    updateCalendar();
+    for(int idx=0; idx<weekbox_list.size(); idx++)
+    {
+        weekbox_list[idx]->show();
+    }
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    updateCalendar();
+    for(int idx=0; idx<weekbox_list.size(); idx++)
+    {
+        weekbox_list[idx]->show();
+    }
+}

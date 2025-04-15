@@ -16,7 +16,6 @@ ListDialog::~ListDialog()
     delete ui;
 }
 
-
 void ListDialog::addListLine()
 {
     emit callDayWidgetClicked(selectedDate);
@@ -43,6 +42,7 @@ QWidget* ListDialog::createTodoItemWidget(QListWidgetItem* item)
     layout->addWidget(lineEdit);
     layout->addWidget(deleteButton);
     layout->addWidget(editButton);
+
     container->setLayout(layout);
 
     // 삭제 버튼 누르면 해당 아이템 삭제
@@ -50,8 +50,6 @@ QWidget* ListDialog::createTodoItemWidget(QListWidgetItem* item)
         int row = ui->listWidget->row(item);
         delete ui->listWidget->takeItem(row);  // 삭제
     });
-
-    //editButton 기능 구현 필요. 11:23
 
     return container;
 }

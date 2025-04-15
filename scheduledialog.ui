@@ -37,9 +37,16 @@
       <widget class="QLineEdit" name="lineEditLocation"/>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="labelTime">
+      <widget class="QLabel" name="labelStartTime">
        <property name="text">
-        <string>시간:</string>
+        <string>시작:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelEndTime">
+       <property name="text">
+        <string>종료:</string>
        </property>
       </widget>
      </item>
