@@ -14,6 +14,7 @@ class ScheduleDialog : public QDialog
     Q_OBJECT
 public:
     explicit ScheduleDialog(QWidget *parent = nullptr, const QDate &date = QDate::currentDate());
+    ScheduleDialog(QWidget *parent, Schedule _sch);
     ~ScheduleDialog();
 
     Schedule getSchedule() const;

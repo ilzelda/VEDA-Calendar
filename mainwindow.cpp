@@ -138,13 +138,12 @@ void MainWindow::dayListAddClicked(const QDate &selectedDate)
     //커스텀 시그널을 만들어서 emit을 통해 dayWidgetClicked 호출
     //listdialog에서 "할 일 추가" 버튼을 누르면 addListLine 실행 addListLine은
     // callDayWidgetClicked를 emit한다 그러면 아래의 connect문을 통해 dayWidgetClicked가 실행된다.
-    connect(&dlg, &ListDialog::callDayWidgetClicked, this, &MainWindow::dayWidgetClicked);
-
+    connect(&dlg, &ListDialog::addListButtonClicked, this, &MainWindow::showScheduleDialogForAdd);
 
     dlg.exec();
 }
 
-void MainWindow::dayWidgetClicked(const QDate &selectedDate)
+void MainWindow::showScheduleDialogForAdd(const QDate &selectedDate)
 {
     ScheduleDialog dlg(this, selectedDate);
     if (dlg.exec() == QDialog::Accepted) {
@@ -153,9 +152,73 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
 
         ListDialog* _listdialog = qobject_cast<ListDialog*>(sender());
         _listdialog->createTodoItemWidget(newSchedule);
-
         qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
     }
+}
+
+
+
+//우리가 원하는 값들
+Schedule MainWindow::showScheduleDialogForUpdate(QWidget *parent, Schedule oldSch)
+{
+    ScheduleDialog dlg(this, oldSch);
+    if(dlg.exec() == QDialog::Accepted){
+        Schedule newSch = dlg.getSchedule();
+
+
+        //map 및 weekbox 수정
+        // 기존 일정 날짜와 새 일정 날짜 구하기
+        QDate oldStart = oldSch.start.date();
+        QDate oldEnd   = oldSch.end.date();
+        QDate newStart = newSch.start.date();
+        QDate newEnd   = newSch.end.date();
+        // 교집합 구하기
+        QDate intersectStart = qMax(oldStart, newStart);
+        QDate intersectEnd   = qMin(oldEnd, newEnd);
+        bool hasIntersection = (intersectStart <= intersectEnd);
+        // 1. 삭제할 기간: 기존 일정에 포함되어 있으나 새 일정에는 없는 날짜들
+        if (hasIntersection) {
+            // [oldStart, intersectStart - 1] 구간 삭제
+            for (QDate d = oldStart; d < intersectStart; d = d.addDays(1)) {
+                deleteSchedule(oldSch);
+            }
+            // [intersectEnd + 1, oldEnd] 구간 삭제
+            for (QDate d = intersectEnd.addDays(1); d <= oldEnd; d = d.addDays(1)) {
+                deleteSchedule(oldSch);
+            }
+        } else {
+            // 교집합이 없으면 기존 전체 기간 삭제
+            for (QDate d = oldStart; d <= oldEnd; d = d.addDays(1)) {
+                deleteSchedule(oldSch);
+            }
+        }
+        // 2. 수정(업데이트)할 기간: 두 일정의 공통 구간
+        if (hasIntersection) {
+            for (QDate d = intersectStart; d <= intersectEnd; d = d.addDays(1)) {
+                updateScheduleInMap(oldSch, newSch, d);   // 기존 Schedule 정보를 새 정보로 갱신
+            }
+        }
+        // 3. 추가할 기간: 새 일정에 포함되나 기존에는 없었던 날짜들
+        if (hasIntersection) {
+            // [newStart, intersectStart - 1] 구간 추가
+            for (QDate d = newStart; d < intersectStart; d = d.addDays(1)) {
+                addSchedule(newSch);
+            }
+            // [intersectEnd + 1, newEnd] 구간 추가
+            for (QDate d = intersectEnd.addDays(1); d <= newEnd; d = d.addDays(1)) {
+                addSchedule(newSch);
+            }
+        } else {
+            // 교집합이 없으면 새 일정 전체 기간 추가
+            for (QDate d = newStart; d <= newEnd; d = d.addDays(1)) {
+                addSchedule(newSch);
+            }
+        }
+
+        return newSch;
+    }
+    Schedule failSch;
+    return failSch;
 }
 
 void MainWindow::addSchedule(Schedule newSchedule)
@@ -224,6 +287,53 @@ void MainWindow::deleteSchedule(Schedule target_sch)
         weekbox_list[idx]->drawSchedules();
     }
 }
+
+
+void MainWindow::updateScheduleInMap(Schedule oldSch, Schedule newSch, QDate d)
+{
+    QList<Schedule>& sch_list = scheduleMap[d];
+    for (int i = 0; i < sch_list.size(); ++i) {
+        Schedule &sch = sch_list[i];
+        if (sch.title == oldSch.title &&
+            sch.location == oldSch.location &&
+            sch.start == oldSch.start &&
+            sch.end == oldSch.end)
+        {
+            sch.title = newSch.title;
+            sch.location = newSch.location;
+            sch.start = newSch.start;
+            sch.end = newSch.end;
+            break;
+        }
+    }
+
+    // weekBox들 수정
+    int wbl_idx_from = int((newSch.start.date().day()-1) / 7);
+    int wbl_idx_to = int((newSch.end.date().day()-1) / 7);
+    for(int idx=wbl_idx_from; idx<=wbl_idx_to; idx++)
+    {
+        // weekbox_list[idx]에서 삭제
+        // weekbox_list의 해당 weekbox에서 target 스케줄을 삭제
+        QList<Schedule>& weekSchedules = weekbox_list[idx]->schedule_list;
+        for (int i = 0; i < weekSchedules.size(); ++i)
+        {
+            Schedule &sch = weekSchedules[i];
+            if (sch.title == oldSch.title &&
+                sch.location == oldSch.location &&
+                sch.start == oldSch.start &&
+                sch.end == oldSch.end)
+            {
+                sch.title = oldSch.title ;
+                sch.location = oldSch.location ;
+                sch.start = oldSch.start ;
+                sch.end = oldSch.end;
+                break;
+            }
+        }
+        weekbox_list[idx]->drawSchedules();
+    }
+}
+
 
 void MainWindow::showEvent(QShowEvent *event)
 {

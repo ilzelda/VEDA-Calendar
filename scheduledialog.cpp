@@ -19,10 +19,24 @@ ScheduleDialog::ScheduleDialog(QWidget *parent, const QDate &date) :
     // schedule.end = QDateTime::currentDateTime().addDays(1);
 }
 
+ScheduleDialog::ScheduleDialog(QWidget *parent, Schedule _sch) :
+    QDialog(parent),
+    ui(new Ui::ScheduleDialog)
+{
+    ui->setupUi(this);
+
+    ui->lineEditTitle->setText(_sch.title);
+    ui->lineEditLocation->setText(_sch.location);
+    ui->dateTimeEditStart->setDateTime(_sch.start);
+    ui->dateTimeEditEnd->setDateTime(_sch.end);
+
+}
+
 ScheduleDialog::~ScheduleDialog()
 {
     delete ui;
 }
+
 
 Schedule ScheduleDialog::getSchedule() const
 {

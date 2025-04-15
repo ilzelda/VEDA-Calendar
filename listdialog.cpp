@@ -18,10 +18,12 @@ ListDialog::ListDialog(QWidget *parent, const QDate &date)
     for(int idx = 0; idx<_sch_list.size(); idx++)
     {
         Schedule& _sch = _sch_list[idx];
+
         createTodoItemWidget(_sch);
+
     }
 
-    connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::addListLine);
+    connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::emitSignalAddListButtonClicked);
 }
 
 ListDialog::~ListDialog()
@@ -29,12 +31,13 @@ ListDialog::~ListDialog()
     delete ui;
 }
 
-void ListDialog::addListLine()
+void ListDialog::emitSignalAddListButtonClicked()
 {
-    emit callDayWidgetClicked(selectedDate);
+    emit addListButtonClicked(selectedDate);
 }
 
-QWidget* ListDialog::createTodoItemWidget(const Schedule _sch)
+
+QWidget* ListDialog::createTodoItemWidget(Schedule _sch)
 {
     QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
     QWidget* container = new QWidget(this);
@@ -72,6 +75,33 @@ QWidget* ListDialog::createTodoItemWidget(const Schedule _sch)
         int row = ui->listWidget->row(item);
         delete ui->listWidget->takeItem(row);  // list 요소 삭제
         qobject_cast<MainWindow*>(main_window)->deleteSchedule(_sch);
+    });
+
+    connect(editButton, &QPushButton::clicked, this, [=](){
+       //emitSignalAddListButtonClicked()
+        //(우리가 원하는 값들 <-_sch) >> showScheduleDialogForUpdated인자값
+        QString currentTitle = titleLabel->text().mid(4);
+        QString currentLocation = locationLabel->text().mid(4);
+        QDateTime currentStart = _sch.start;
+        QDateTime currentEnd = _sch.end;
+        qDebug() << "new Title : " << currentTitle;
+        // Schedule 객체 생성
+        Schedule currentSchedule;
+        currentSchedule.title = currentTitle;
+        currentSchedule.location = currentLocation;
+        currentSchedule.start = currentStart;
+        currentSchedule.end = currentEnd;
+
+        Schedule newSch = qobject_cast<MainWindow*>(main_window)->showScheduleDialogForUpdate(this, currentSchedule);
+        if(newSch.title.size() > 0)
+        {
+            // 수정된 Schedule 값을 반영해서 라벨 텍스트 업데이트
+            titleLabel->setText(QString("제목: %1").arg(newSch.title));
+            locationLabel->setText(QString("장소: %1").arg(newSch.location));
+            timeLabel->setText(QString("시간: %1 ~ %2")
+                                   .arg(newSch.start.toString("yyyy-MM-dd hh:mm"))
+                                   .arg(newSch.end.toString("yyyy-MM-dd hh:mm")));
+        }
     });
 
     item->setSizeHint(container->sizeHint());

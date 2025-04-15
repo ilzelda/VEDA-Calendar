@@ -35,14 +35,15 @@ public:
 
     QMap<QDate, QList<Schedule>>& sch_map;
 
-    QWidget* createTodoItemWidget(const Schedule);
+    QWidget* createTodoItemWidget(Schedule _sch);
+
 private:
     QDate selectedDate; // dayListAddClicked에서 dayWidgetClicked를 호출할때 selectedDate 필요해서추가
 
 signals:
-    void callDayWidgetClicked(const QDate &date);
+    void addListButtonClicked(const QDate &date);
 private slots:
-    void addListLine();
+    void emitSignalAddListButtonClicked();
 
 private:
     Ui::ListDialog *ui;
