@@ -7,6 +7,9 @@
 #include <QList>
 #include "Schedule.h"
 
+#include "weekbox.h"
+#include "Schedule.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -34,6 +37,11 @@ private:
     Ui::MainWindow *ui;
     QDate currentMonth;                // 현재 표시 중인 달 (매월 1일로 설정)
     QMap<QDate, QList<Schedule>> scheduleMap;  // 날짜별 일정 목록
+    QList<WeekBox*> weekbox_list;
+
+protected:
+    void showEvent(QShowEvent*) override;
+    void resizeEvent(QResizeEvent*) override;
 };
 
 #endif // MAINWINDOW_H
