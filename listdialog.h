@@ -13,6 +13,9 @@
 #include <QListWidgetItem>
 #include <QFileDialog>
 #include <QDialog>
+
+#include "Schedule.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class ListDialog;
@@ -30,6 +33,7 @@ public:
     
     ~ListDialog();
 
+    QMap<QDate, QList<Schedule>>& sch_map;
 
     QWidget* createTodoItemWidget(
                                           const QString &title,

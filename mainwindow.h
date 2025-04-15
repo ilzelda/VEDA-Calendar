@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QMap<QDate, QList<Schedule>> scheduleMap;  // 날짜별 일정 목록
 
 private slots:
     void onShiftLeftClicked();
@@ -33,7 +34,6 @@ private:
 
     Ui::MainWindow *ui;
     QDate currentMonth;                // 현재 표시 중인 달 (매월 1일로 설정)
-    QMap<QDate, QList<Schedule>> scheduleMap;  // 날짜별 일정 목록
     QList<WeekBox*> weekbox_list;
 
 protected:

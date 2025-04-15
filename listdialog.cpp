@@ -1,12 +1,24 @@
+#include "Schedule.h"
 #include "listdialog.h"
+#include "mainwindow.h"
+
 #include "./ui_listdialog.h"
 
 ListDialog::ListDialog(QWidget *parent, const QDate &date)
     : QDialog(parent)
     , selectedDate(date)
+    , sch_map(qobject_cast<MainWindow*>(parent)->scheduleMap)
     , ui(new Ui::ListDialog)
 {
     ui->setupUi(this);
+    // 이전에 저장해놓았던것들 불러오기
+    QList<Schedule>& _sch_list = sch_map[date];
+
+    for(int idx = 0; idx<_sch_list.size(); idx++)
+    {
+        Schedule& _sch = _sch_list[idx];
+        createTodoItemWidget(_sch.title, _sch.location, _sch.start, _sch.end);
+    }
 
     connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::addListLine);
 }
@@ -19,15 +31,6 @@ ListDialog::~ListDialog()
 void ListDialog::addListLine()
 {
     emit callDayWidgetClicked(selectedDate);
-
-    //QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
-    //QWidget* itemWidget = createTodoItemWidget();
-
-    // item->setSizeHint(itemWidget->sizeHint());
-    // ui->listWidget->addItem(item);
-    // ui->listWidget->setItemWidget(item, itemWidget);
-
-    qDebug() << "항목 추가됨";
 }
 
 QWidget* ListDialog::createTodoItemWidget(
@@ -71,7 +74,25 @@ QWidget* ListDialog::createTodoItemWidget(
     connect(deleteButton, &QPushButton::clicked, this, [=]() {
         int row = ui->listWidget->row(item);
         delete ui->listWidget->takeItem(row);  // 삭제
+
+        // 2. map에서 스케줄 삭제 (selectedDate는 이 다이얼로그의 날짜)
+        QList<Schedule>& scheduleList = sch_map[selectedDate];
+        for (int i = 0; i < scheduleList.size(); ++i) {
+            const Schedule &sch = scheduleList[i];
+            if (sch.title == title &&
+                sch.location == location &&
+                sch.start == start &&
+                sch.end == end)
+            {
+                scheduleList.removeAt(i);
+                break;
+            }
+        }
     });
+
+    item->setSizeHint(container->sizeHint());
+    ui->listWidget->addItem(item);
+    ui->listWidget->setItemWidget(item, container);
 
     return container;
 }
