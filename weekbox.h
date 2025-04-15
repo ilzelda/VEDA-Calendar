@@ -22,7 +22,6 @@ public:
 
     void drawSchedules();
 
-protected:
     void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
