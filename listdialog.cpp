@@ -76,6 +76,10 @@ QWidget* ListDialog::createTodoItemWidget(
         delete ui->listWidget->takeItem(row);  // 삭제
 
         // 2. map에서 스케줄 삭제 (selectedDate는 이 다이얼로그의 날짜)
+        // find info of target schedule and remove schedule in current list
+        QString target_title = title;
+        QList<QDate> target_dates;
+
         QList<Schedule>& scheduleList = sch_map[selectedDate];
         for (int i = 0; i < scheduleList.size(); ++i) {
             const Schedule &sch = scheduleList[i];
@@ -84,8 +88,29 @@ QWidget* ListDialog::createTodoItemWidget(
                 sch.start == start &&
                 sch.end == end)
             {
+                for(QDate _d=sch.start.date(); _d<=sch.end.date(); _d = _d.addDays(1))
+                {
+                    target_dates.append(_d);
+                }
                 scheduleList.removeAt(i);
                 break;
+            }
+        }
+
+        // remove extra schedule
+        for(QDate _d : target_dates)
+        {
+            QList<Schedule>& scheduleList = sch_map[_d];
+            for (int i = 0; i < scheduleList.size(); ++i) {
+                const Schedule &sch = scheduleList[i];
+                if (sch.title == title &&
+                    sch.location == location &&
+                    sch.start == start &&
+                    sch.end == end)
+                {
+                    scheduleList.removeAt(i);
+                    break;
+                }
             }
         }
     });
