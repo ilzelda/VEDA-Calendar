@@ -32,6 +32,9 @@ private:
     int nth_week;
     int min_day;
     int max_day;
+
+signals:
+    void newScheduleAdded(Schedule);
 };
 
 

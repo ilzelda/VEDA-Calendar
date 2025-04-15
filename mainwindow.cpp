@@ -7,7 +7,6 @@
 
 #include <QPushButton>
 #include <QDebug>
-#include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -65,7 +64,6 @@ void MainWindow::updateCalendar()
     qDeleteAll(weekbox_list);
     weekbox_list.clear();
 
-
     qDebug() << "container width:" << container->width() << "container height:" <<container->height();
 
     // row의 수만큼 weekbox 생성
@@ -80,7 +78,34 @@ void MainWindow::updateCalendar()
         weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
 
         weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
+
+        QDate _date = currentMonth.addDays(r*7);
+        for(int i=0; i<7; i++ )
+        {
+            for(Schedule _sch : scheduleMap[_date])
+            {
+                bool exists = false;
+                // weekbox->schedule_list에 이미 같은 스케줄이 존재하는지 검사
+                for (const Schedule &existing : weekbox->schedule_list) {
+                    if (existing.title == _sch.title &&
+                        existing.location == _sch.location &&
+                        existing.start == _sch.start &&
+                        existing.end == _sch.end)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                // 동일한 스케줄이 없을 경우 추가
+                if (!exists) {
+                    weekbox->schedule_list.append(_sch);
+                }
+            }
+            _date = _date.addDays(1);
+        }
+        qDebug() << r <<"th weekbox has "<<weekbox->schedule_list.size()<<"schedule";
         weekbox->show();
+        weekbox->drawSchedules();
 
         weekbox_list.append(weekbox);
     }
@@ -126,32 +151,24 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
 
-        qDebug() << "addSchedule(newSchedule)";
-
         ListDialog* _listdialog = qobject_cast<ListDialog*>(sender());
-        _listdialog->createTodoItemWidget(newSchedule.title, newSchedule.location, newSchedule.start, newSchedule.end);
+        _listdialog->createTodoItemWidget(newSchedule);
 
         qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
-
     }
 }
 
 void MainWindow::addSchedule(Schedule newSchedule)
 {
-    qDebug() << "inside addSchedule()";
-
     // scheduleMap 수정
-    for (QDate date = newSchedule.start.date(); date <= newSchedule.end.date(); date = date.addDays(1)) {
+    for (QDate date = newSchedule.start.date(); date <= newSchedule.end.date(); date = date.addDays(1))
+    {
         QList<Schedule> list = scheduleMap.value(date);
         list.append(newSchedule);
-        // // 시간순으로 정렬
-        // std::sort(list.begin(), list.end(), [](const Schedule &a, const Schedule &b){
-        //     return a.time < b.time;
-        // });
         scheduleMap[date] = list;
     }
 
-    qDebug() << "before modify weebox";
+    qDebug() << "before modify weekbox";
 
     // weekBox들 수정
     int wbl_idx_from = int((newSchedule.start.date().day()-1) / 7);
@@ -164,6 +181,49 @@ void MainWindow::addSchedule(Schedule newSchedule)
     }
 }
 
+void MainWindow::deleteSchedule(Schedule target_sch)
+{
+    // map에서 스케줄 삭제 (selectedDate는 이 다이얼로그의 날짜)
+    // find info of target schedule and remove schedule in current list
+    for(QDate _d=target_sch.start.date(); _d<=target_sch.end.date(); _d=_d.addDays(1))
+    {
+        QList<Schedule>& scheduleList = scheduleMap[_d];
+        for (int i = 0; i < scheduleList.size(); ++i) {
+            const Schedule &sch = scheduleList[i];
+            if (sch.title == target_sch.title &&
+                sch.location == target_sch.location &&
+                sch.start == target_sch.start &&
+                sch.end == target_sch.end)
+            {
+                scheduleList.removeAt(i);
+                break;
+            }
+        }
+    }
+
+    // weekBox들 수정
+    int wbl_idx_from = int((target_sch.start.date().day()-1) / 7);
+    int wbl_idx_to = int((target_sch.end.date().day()-1) / 7);
+    for(int idx=wbl_idx_from; idx<=wbl_idx_to; idx++)
+    {
+        // weekbox_list[idx]에서 삭제
+        // weekbox_list의 해당 weekbox에서 target 스케줄을 삭제
+        QList<Schedule>& weekSchedules = weekbox_list[idx]->schedule_list;
+        for (int i = 0; i < weekSchedules.size(); ++i)
+        {
+            const Schedule &sch = weekSchedules[i];
+            if (sch.title == target_sch.title &&
+                sch.location == target_sch.location &&
+                sch.start == target_sch.start &&
+                sch.end == target_sch.end)
+            {
+                weekSchedules.removeAt(i);
+                break;
+            }
+        }
+        weekbox_list[idx]->drawSchedules();
+    }
+}
 
 void MainWindow::showEvent(QShowEvent *event)
 {

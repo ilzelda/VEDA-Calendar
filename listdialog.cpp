@@ -7,6 +7,7 @@
 ListDialog::ListDialog(QWidget *parent, const QDate &date)
     : QDialog(parent)
     , selectedDate(date)
+    , main_window(qobject_cast<MainWindow*>(parent))
     , sch_map(qobject_cast<MainWindow*>(parent)->scheduleMap)
     , ui(new Ui::ListDialog)
 {
@@ -17,7 +18,7 @@ ListDialog::ListDialog(QWidget *parent, const QDate &date)
     for(int idx = 0; idx<_sch_list.size(); idx++)
     {
         Schedule& _sch = _sch_list[idx];
-        createTodoItemWidget(_sch.title, _sch.location, _sch.start, _sch.end);
+        createTodoItemWidget(_sch);
     }
 
     connect(ui->addListButton, &QPushButton::clicked, this, &ListDialog::addListLine);
@@ -33,22 +34,18 @@ void ListDialog::addListLine()
     emit callDayWidgetClicked(selectedDate);
 }
 
-QWidget* ListDialog::createTodoItemWidget(
-                                          const QString &title,
-                                          const QString &location,
-                                          const QDateTime &start,
-                                          const QDateTime &end)
+QWidget* ListDialog::createTodoItemWidget(const Schedule _sch)
 {
     QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
     QWidget* container = new QWidget(this);
     QHBoxLayout* mainLayout = new QHBoxLayout(container);
 
-    QLabel* titleLabel = new QLabel(QString("제목: %1").arg(title), container);
-    QLabel* locationLabel = new QLabel(QString("장소: %1").arg(location), container);
+    QLabel* titleLabel = new QLabel(QString("제목: %1").arg(_sch.title), container);
+    QLabel* locationLabel = new QLabel(QString("장소: %1").arg(_sch.location), container);
     QLabel* timeLabel = new QLabel(
         QString("시간: %1 ~ %2")
-            .arg(start.toString("yyyy-MM-dd hh:mm"))
-            .arg(end.toString("yyyy-MM-dd hh:mm")),
+            .arg(_sch.start.toString("yyyy-MM-dd hh:mm"))
+            .arg(_sch.end.toString("yyyy-MM-dd hh:mm")),
         container
         );
 
@@ -73,21 +70,8 @@ QWidget* ListDialog::createTodoItemWidget(
     // 삭제 버튼 누르면 해당 아이템 삭제
     connect(deleteButton, &QPushButton::clicked, this, [=]() {
         int row = ui->listWidget->row(item);
-        delete ui->listWidget->takeItem(row);  // 삭제
-
-        // 2. map에서 스케줄 삭제 (selectedDate는 이 다이얼로그의 날짜)
-        QList<Schedule>& scheduleList = sch_map[selectedDate];
-        for (int i = 0; i < scheduleList.size(); ++i) {
-            const Schedule &sch = scheduleList[i];
-            if (sch.title == title &&
-                sch.location == location &&
-                sch.start == start &&
-                sch.end == end)
-            {
-                scheduleList.removeAt(i);
-                break;
-            }
-        }
+        delete ui->listWidget->takeItem(row);  // list 요소 삭제
+        qobject_cast<MainWindow*>(main_window)->deleteSchedule(_sch);
     });
 
     item->setSizeHint(container->sizeHint());
