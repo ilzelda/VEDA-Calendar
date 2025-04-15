@@ -18,15 +18,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
     QMap<QDate, QList<Schedule>> scheduleMap;  // 날짜별 일정 목록
     Schedule showScheduleDialogForUpdate(QWidget *parent, Schedule _sch);
     void deleteSchedule(Schedule oldSch);
     void updateScheduleInMap(Schedule oldSch, Schedule newSch, QDate d);
 
+    void deleteSchedule(Schedule newSchedule);
+    void addSchedule(Schedule newSchedule);
+
 private slots:
     void onShiftLeftClicked();
     void onShiftRightClicked();
-    void addSchedule(Schedule newSchedule);
+
 
     //새로운 슬롯 추가 17:05 daywidget
     void dayListAddClicked(const QDate &selectedDate);
