@@ -65,6 +65,7 @@ void MainWindow::updateCalendar()
     qDeleteAll(weekbox_list);
     weekbox_list.clear();
 
+
     qDebug() << "container width:" << container->width() << "container height:" <<container->height();
 
     // row의 수만큼 weekbox 생성
@@ -124,14 +125,21 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
     if (dlg.exec() == QDialog::Accepted) {
         Schedule newSchedule = dlg.getSchedule();
         addSchedule(newSchedule);
-      
-       qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
+
+        qDebug() << "addSchedule(newSchedule)";
+
+        ListDialog* _listdialog = qobject_cast<ListDialog*>(sender());
+        _listdialog->createTodoItemWidget(newSchedule.title, newSchedule.location, newSchedule.start, newSchedule.end);
+
+        qDebug() << "추가된 일정:" << newSchedule.start.date() << newSchedule.title;
 
     }
 }
 
 void MainWindow::addSchedule(Schedule newSchedule)
 {
+    qDebug() << "inside addSchedule()";
+
     // scheduleMap 수정
     for (QDate date = newSchedule.start.date(); date <= newSchedule.end.date(); date = date.addDays(1)) {
         QList<Schedule> list = scheduleMap.value(date);
@@ -142,6 +150,8 @@ void MainWindow::addSchedule(Schedule newSchedule)
         // });
         scheduleMap[date] = list;
     }
+
+    qDebug() << "before modify weebox";
 
     // weekBox들 수정
     int wbl_idx_from = int((newSchedule.start.date().day()-1) / 7);
