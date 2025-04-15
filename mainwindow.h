@@ -5,18 +5,11 @@
 #include <QDate>
 #include <QMap>
 #include <QList>
+#include "Schedule.h"
 
 namespace Ui {
 class MainWindow;
 }
-
-// 일정 정보를 저장할 구조체
-struct Schedule {
-    QString title;
-    QString location;
-    QTime time;
-    QDate date;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -28,8 +21,12 @@ public:
 private slots:
     void onShiftLeftClicked();
     void onShiftRightClicked();
-    void dayButtonClicked();
+    //void dayButtonClicked();
     void addSchedule(Schedule newSchedule);
+
+    //새로운 슬롯 추가 17:05 daywidget
+    void dayWidgetClicked(const QDate &date);
+    void dayListAddClicked(const QDate &selectedDate);
 
 private:
     void updateCalendar();
