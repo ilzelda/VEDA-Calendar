@@ -38,6 +38,7 @@ DayWidget::~DayWidget()
 
 void DayWidget::handleButtonClick()
 {
+    qDebug()<<"dayWidget("<<date<<")"<<"clicked";
     emit clicked(date);
 }
 

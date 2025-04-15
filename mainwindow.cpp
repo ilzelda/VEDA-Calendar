@@ -58,33 +58,32 @@ void MainWindow::updateCalendar()
     }
 
     // qDebug() << "row :" << row;
-    // weekbox들을 gridLayout의 부모 위젯에 올리고, pushbutton들 위에 보이게 처리
-    // gridLayout의 부모 위젯을 가져옵니다. (예: ui->calendarWidget 등)
-    QWidget *container = ui->gridLayout->parentWidget();
-    // qDebug() << "container :" << "h:" << container->height() << "w:"<< container->width();
+    QWidget *container = ui->gridLayout->parentWidget(); // centralWidget
+    qDebug() << "container :" << "h:" << container->height() << "w:"<< container->width();
 
     // 기존 weekbox 목록이 있다면 필요에 따라 삭제 후 새로 생성합니다.
     qDeleteAll(weekbox_list);
     weekbox_list.clear();
 
-    // // row의 수만큼 weekbox 생성
-    // int n_row = row+1;
-    // for(int r = 0; r <= n_row; r++)
-    // {
-    //     WeekBox* weekbox = new WeekBox(r, container);
-    //     // weekbox의 위치와 크기를 원하는 대로 지정합니다.
-    //     // gridLayout에서 r번째 행의 영역에 맞게 위치시키기 위한 계산
-    //     int yPos = r * (container->height() / n_row);
-    //     weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
 
-    //     // pushbutton들 위로 올리기 위해 raise() 호출
-    //     weekbox->raise();
+    qDebug() << "container width:" << container->width() << "container height:" <<container->height();
 
-    //     weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
-    //     // weekbox->show();
+    // row의 수만큼 weekbox 생성
+    int n_row = row+1;
+    for(int r = 0; r <= n_row; r++)
+    {
+        WeekBox* weekbox = new WeekBox(r, container);
+        weekbox->raise();
 
-    //     weekbox_list.append(weekbox);
-    // }
+        int yPos = r * (container->height() / n_row);
+
+        weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
+
+        weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
+        weekbox->show();
+
+        weekbox_list.append(weekbox);
+    }
 }
 
 
@@ -101,21 +100,6 @@ void MainWindow::onShiftRightClicked()
     currentMonth.setDate(currentMonth.year(), currentMonth.month(), 1);
     updateCalendar();
 }
-
-
-// void MainWindow::dayButtonClicked()
-// {
-//     QPushButton *button = qobject_cast<QPushButton*>(sender());
-//     if (!button) return;
-
-//     QDate selectedDate = button->property("date").toDate();
-//     ScheduleDialog dlg(this, selectedDate);
-//     if (dlg.exec() == QDialog::Accepted) {
-//         Schedule newSchedule = dlg.getSchedule();
-//         addSchedule(newSchedule);
-//         qDebug() << "추가된 일정:" << newSchedule.date << newSchedule.title;
-//     }
-// }
 
 void MainWindow::dayListAddClicked(const QDate &selectedDate)
 {
@@ -152,7 +136,6 @@ void MainWindow::dayWidgetClicked(const QDate &selectedDate)
     }
 }
 
-
 void MainWindow::addSchedule(Schedule newSchedule)
 {
     qDebug() << "inside addSchedule()";
@@ -176,8 +159,8 @@ void MainWindow::addSchedule(Schedule newSchedule)
     for(int idx=wbl_idx_from; idx<=wbl_idx_to; idx++)
     {
         weekbox_list[idx]->schedule_list.append(newSchedule);
-        qDebug() << "update " << idx << "th weekbox";
-        weekbox_list[idx]->show();
+        qDebug() << "[addSchedule] update " << idx << "th weekbox";
+        weekbox_list[idx]->drawSchedules();
     }
 }
 
@@ -188,7 +171,7 @@ void MainWindow::showEvent(QShowEvent *event)
     updateCalendar();
     for(int idx=0; idx<weekbox_list.size(); idx++)
     {
-        weekbox_list[idx]->show();
+        weekbox_list[idx]->showEvent(event);
     }
 }
 
@@ -198,6 +181,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     updateCalendar();
     for(int idx=0; idx<weekbox_list.size(); idx++)
     {
-        weekbox_list[idx]->show();
+        weekbox_list[idx]->resizeEvent(event);
     }
 }
