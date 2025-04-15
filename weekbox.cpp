@@ -34,9 +34,9 @@ WeekBox::~WeekBox()
 
 void WeekBox::drawSchedules()
 {
-    bool DEBUG = true;
-    // bool DEBUG = false;
-    qDebug()<<"[drawSchedules()] Rendering"<<nth_week<< "th week : ";
+    // bool DEBUG = true;
+    bool DEBUG = false;
+    if (DEBUG) qDebug()<<"[drawSchedules()] Rendering"<<nth_week<< "th week : ";
 
     scene->clear();
     // 위젯 전체 영역 (QGraphicsView의 viewport 크기를 사용)
@@ -44,8 +44,10 @@ void WeekBox::drawSchedules()
 
     // 디버그용 경계선을 추가 (원래 paintEvent에서 그리던 테두리)
     if (DEBUG)
+    {
         scene->addRect(widgetRect, QPen(Qt::black), QBrush(Qt::NoBrush));
         qDebug()<<"[drawSchedules()|DEBUG] 테두리";
+    }
 
 
     // 가로 7등분: 각 칸의 너비 계산
@@ -90,12 +92,14 @@ void WeekBox::drawSchedules()
 
 void WeekBox::showEvent(QShowEvent* event)
 {
+    bool DEBUG = false;
+
     // 기본 show 이벤트 처리
     QGraphicsView::showEvent(event);
 
     // 위젯이 처음 보여질 때 한 번 sceneRect 업데이트
     scene->setSceneRect(0, 0, this->width(), this->height());
-    qDebug() << "[WeekBox showEvent]" << this->width() << " " <<this->height();
+    if (DEBUG) qDebug() << "[WeekBox showEvent]" << this->width() << " " <<this->height();
     drawSchedules();
 }
 

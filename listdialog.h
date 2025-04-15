@@ -27,19 +27,15 @@ class ListDialog : public QDialog
     Q_OBJECT
 
 public:
-
     ListDialog(QWidget *parent = nullptr, const QDate &date = QDate::currentDate());
     //const QDate &date = QDate::currentDate() selected Date 받아오기 위해서
-    
     ~ListDialog();
+
+    QWidget *main_window;
 
     QMap<QDate, QList<Schedule>>& sch_map;
 
-    QWidget* createTodoItemWidget(
-                                          const QString &title,
-                                          const QString &location,
-                                          const QDateTime &start,
-                                          const QDateTime &end);
+    QWidget* createTodoItemWidget(const Schedule);
 private:
     QDate selectedDate; // dayListAddClicked에서 dayWidgetClicked를 호출할때 selectedDate 필요해서추가
 
