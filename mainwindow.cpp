@@ -2,8 +2,8 @@
 #include "ui_mainwindow.h"
 #include "scheduledialog.h"
 #include "daywidget.h"
-#include "Schedule.h"
 #include "listdialog.h"
+#include "searchdialog.h"
 
 #include <QPushButton>
 #include <QDebug>
@@ -15,6 +15,18 @@ MainWindow::MainWindow(QWidget *parent) :
     currentMonth(QDate::currentDate())
 {
     ui->setupUi(this);
+    menubar = new QMenuBar(this);
+    setMenuBar(menubar);
+    QAction *searchAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::SystemSearch),
+                                   tr("&일정 찾기"), this);
+    searchAct->setShortcut(tr("Ctrl+F"));
+    searchAct->setStatusTip(tr("Search"));
+
+    connect(searchAct, &QAction::triggered, this, &MainWindow::searchSchedule);
+
+    QMenu* toolMenu = menubar->addMenu("&도구");
+    toolMenu->addAction(searchAct);
+
     // 현재 달을 1일로 설정
     currentMonth.setDate(currentMonth.year(), currentMonth.month(), 1);
 
@@ -349,6 +361,66 @@ void MainWindow::updateScheduleInMap(Schedule oldSch, Schedule newSch, QDate d)
     }
 }
 
+void MainWindow::searchSchedule()
+{
+    while(true)
+    {
+        SearchDialog dlg(this);
+        if(dlg.exec() == QDialog::Accepted)
+        {
+            qDebug() << "[searchSchedule] start searching";
+
+            QList<Schedule> found_schedule_list;
+            for (auto it = scheduleMap.constBegin(); it != scheduleMap.constEnd(); ++it) {
+                // QList<Schedule>에 접근
+
+                const QList<Schedule>& schedule_list = it.value();
+                qDebug() << it.key() << " : " << schedule_list.size();
+
+                for (const Schedule schedule : schedule_list) {
+                    if (schedule.title == dlg.target_title) {
+
+                        bool exists = false;
+                        for(Schedule el : found_schedule_list)
+                        {
+                            if(isScheduleSame(el, schedule))
+                            {
+                                qDebug() << "el:" << el.title << " " << el.location << " " << el.start << el.end;
+                                qDebug() << "sc:" << schedule.title << " " << schedule.location << " " << schedule.start << schedule.end;
+
+                                exists = true;
+                                break;
+                            }
+                        }
+                        if(!exists)
+                        {
+                            qDebug() << "   ADD ";
+                            found_schedule_list.append(schedule);
+                        }
+                    }
+                }
+            }
+
+            if(found_schedule_list.size() == 0)
+            {
+                qDebug() << "[searchSchedule] Not found";
+                // 찾지 못했음 경고창
+                QMessageBox::warning(this,
+                                     tr("스케줄 검색"),
+                                     tr("검색하신 '%1' 스케줄을 찾을 수 없습니다.")
+                                         .arg(dlg.target_title));
+                continue;
+            }
+            else
+            {
+                qDebug() << "[searchSchedule] found "<<found_schedule_list.size()<<" schedules";
+                dayListAddClicked(found_schedule_list[0].start.date());
+            }
+        }
+        break;
+    }
+
+}
 
 void MainWindow::showEvent(QShowEvent *event)
 {
@@ -368,4 +440,12 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     {
         weekbox_list[idx]->resizeEvent(event);
     }
+}
+
+bool MainWindow::isScheduleSame(Schedule sch1, Schedule sch2)
+{
+    return ( (sch1.title == sch2.title)
+            && (sch1.location == sch2.location)
+            && (sch1.start == sch2.start)
+            && (sch1.end == sch2.end) );
 }
