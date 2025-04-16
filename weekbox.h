@@ -14,7 +14,7 @@ class WeekBox : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit WeekBox(int n, QWidget *parent = nullptr);
+    explicit WeekBox(QDate month, int n, QWidget *parent = nullptr);
     ~WeekBox();
 
     QList<Schedule> schedule_list;
@@ -24,11 +24,9 @@ public:
 
     void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
+    QDate month;
     int nth_week;
     int min_day;
     int max_day;

@@ -15,6 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     currentMonth(QDate::currentDate())
 {
     ui->setupUi(this);
+
+    setMinimumSize(474, 538);
+    setMaximumSize(474, 538);
+
     menubar = new QMenuBar(this);
     setMenuBar(menubar);
     QAction *searchAct = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::SystemSearch),
@@ -36,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->shift_right->setIcon(rightArrow);
     ui->shift_left->setIconSize(QSize(32, 32));
     ui->shift_right->setIconSize(QSize(32, 32));
-    ui->shift_left->setFixedSize(40, 40);
-    ui->shift_right->setFixedSize(40, 40);
+    // ui->shift_left->setFixedSize(40, 40);
+    // ui->shift_right->setFixedSize(40, 40);
     if (leftArrow.isNull()) {
         qDebug() << "왼쪽 아이콘 로딩 실패!";
     }
@@ -83,30 +87,70 @@ void MainWindow::updateCalendar()
         }
     }
 
-    // qDebug() << "row :" << row;
+    int n_row = row+1;
+    if (currentMonth.month() == 2 ) n_row--;
+
+    // qDebug() << currentMonth<<"의 row 개수 : "<<n_row;
+
+    // weebox 위치 설정
+
     QWidget *container = ui->gridLayout->parentWidget(); // centralWidget
-    qDebug() << "container :" << "h:" << container->height() << "w:"<< container->width();
+    // container->setStyleSheet("border: 2px dashed red;");
+    qDebug() << "container width:" << container->width() << "container height:" <<container->height();
 
     // 기존 weekbox 목록이 있다면 필요에 따라 삭제 후 새로 생성합니다.
     qDeleteAll(weekbox_list);
     weekbox_list.clear();
 
-    qDebug() << "container width:" << container->width() << "container height:" <<container->height();
+    int offset = ui->monthLabel->geometry().top()+ ui->monthLabel->height() + container->layout()->spacing();
+
+    // qDebug() << "offset : "<<ui->monthLabel->geometry().top() << " + " << ui->monthLabel->height();
+    // int weekbox_region_height = container->height() - ui->monthLabel->height();
+    // qDebug() <<"region height 1" <<weekbox_region_height;
+
+    ui->gridLayout->activate();
+    QLayoutItem *first_item = ui->gridLayout->itemAtPosition(0, 0);
+    QSize widgetSize;
+    if (first_item && first_item->widget())
+    {
+        QWidget *w = first_item->widget();
+        widgetSize = w->size();
+    }
+
+    int v_spacing = (container->height() - offset - (n_row * widgetSize.height())) / n_row;
+    int container_r_padding = 18;
+    int container_l_padding = 9;
+    int h_spacing = (container->width() - container_l_padding - container_r_padding
+                     - (7*widgetSize.width())) / 6;
+    // int h_spacing = container->width() -
+    // qDebug() << widgetSize;
+    // int weekbox_region_height = (widgetSize.height() + ui->gridLayout->verticalSpacing()) * n_row;
+    // int weekbox_region_height = (widgetSize.height()) * n_row;
+    // qDebug() <<"region height 2" <<weekbox_region_height;
+
+    // weekbox_region_height = availableRect.height();
+    // qDebug() <<"region height 3" <<weekbox_region_height;
 
     // row의 수만큼 weekbox 생성
-    int n_row = row+1;
-    for(int r = 0; r <= n_row; r++)
+    for(int r = 0; r < n_row; r++)
     {
-        WeekBox* weekbox = new WeekBox(r, container);
+        WeekBox* weekbox = new WeekBox(currentMonth, r, container);
         weekbox->raise();
 
-        int yPos = r * (container->height() / n_row);
+        // qDebug() << " layout spacing : " <<ui->gridLayout->verticalSpacing();
+        int heightPerWeek = widgetSize.height() + ui->gridLayout->verticalSpacing();
+        int yPos = r * (heightPerWeek+v_spacing) + offset;
+        // int yPos = ui->monthLabel->height() + r * heightPerWeek;
 
-        weekbox->setGeometry(0, yPos, container->width(), container->height() / n_row);
+
+        weekbox->setGeometry(container_l_padding, yPos, container->width()-container_r_padding, heightPerWeek);
+
+        // weekbox->setGeometry(availableRect.x(), yPos, availableRect.width(), heightPerWeek);
 
         weekbox->scene->setSceneRect(0, 0, weekbox->width(), weekbox->height());
 
         QDate _date = currentMonth.addDays(r*7);
+        int MAX_DATE = currentMonth.daysInMonth();
         for(int i=0; i<7; i++ )
         {
             for(Schedule _sch : scheduleMap[_date])
@@ -129,6 +173,7 @@ void MainWindow::updateCalendar()
                 }
             }
             _date = _date.addDays(1);
+            if(_date.month() > currentMonth.month()) break;
         }
         qDebug() << r <<"th weekbox has "<<weekbox->schedule_list.size()<<"schedule";
         weekbox->show();

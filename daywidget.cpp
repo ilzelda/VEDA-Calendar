@@ -20,12 +20,13 @@ DayWidget::DayWidget(const QDate &date, QWidget *parent)
     this->setMinimumSize(60, 90);
     ui->pushButton->setMinimumSize(60, 90);
     //레이아웃 추가
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(ui->pushButton);
-    layout->setContentsMargins(0, 0, 0, 0); // 테두리 여백 제거 (선택 사항)
-    layout->setSpacing(0); // 위젯 사이 여백 제거 (선택 사항)
-    this->setLayout(layout);
+    // QVBoxLayout *layout = new QVBoxLayout(this);
+    // layout->addWidget(ui->pushButton);
+    // layout->setContentsMargins(0, 0, 0, 0); // 테두리 여백 제거 (선택 사항)
+    // layout->setSpacing(10); // 위젯 사이 여백 제거 (선택 사항)
+    // this->setLayout(layout);
 
+    // this->setStyleSheet("border: 1px dashed red;");
 
     connect(ui->pushButton, &QPushButton::clicked, this, &DayWidget::handleButtonClick);
 
