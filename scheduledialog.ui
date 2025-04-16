@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>205</width>
-    <height>150</height>
+    <height>156</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,13 +52,20 @@
      </item>
      <item row="2" column="1">
       <widget class="QDateTimeEdit" name="dateTimeEditStart">
+       <property name="currentSection">
+        <enum>QDateTimeEdit::Section::HourSection</enum>
+       </property>
        <property name="calendarPopup">
         <bool>false</bool>
        </property>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QDateTimeEdit" name="dateTimeEditEnd"/>
+      <widget class="QDateTimeEdit" name="dateTimeEditEnd">
+       <property name="currentSection">
+        <enum>QDateTimeEdit::Section::HourSection</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

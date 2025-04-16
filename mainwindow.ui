@@ -2,18 +2,29 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>229</width>
+    <height>52</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>일정관리 프로그램</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <!-- 월 전환 버튼 및 현재 월 표시 -->
     <item>
      <layout class="QHBoxLayout" name="monthNavigationLayout">
       <item>
        <widget class="QPushButton" name="shift_left">
         <property name="text">
-         <string>&lt;</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>:/icon/icon/left-512.png</normaloff>:/icon/icon/left-512.png</iconset>
         </property>
        </widget>
       </item>
@@ -23,26 +34,25 @@
          <string>2025-04</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="shift_right">
-        <property name="text">
-         <string>&gt;</string>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>:/icon/icon/right-512.png</normaloff>:/icon/icon/right-512.png</iconset>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <!-- 캘린더 그리드 (날짜 버튼들이 동적으로 생성됨) -->
     <item>
-     <widget class="QWidget" name="calendarWidget">
-      <layout class="QGridLayout" name="gridLayout">
-       <!-- 날짜 버튼들은 코드에서 생성하여 addWidget() -->
-      </layout>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout"/>
     </item>
    </layout>
   </widget>

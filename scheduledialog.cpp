@@ -1,5 +1,6 @@
 #include "scheduledialog.h"
 #include "ui_scheduledialog.h"
+#include <QMessageBox>
 // #include <QDateTime>
 // #include <QDate>
 ScheduleDialog::ScheduleDialog(QWidget *parent, const QDate &date) :
@@ -45,6 +46,26 @@ Schedule ScheduleDialog::getSchedule() const
 
 void ScheduleDialog::on_input_button_clicked()
 {
+        QDateTime check_start = ui->dateTimeEditStart->dateTime();
+        QDateTime check_end = ui->dateTimeEditEnd->dateTime();
+
+        if (check_start > check_end) {
+            QMessageBox::warning(this, tr("시간 오류"), tr("종료 시간이 시작 시간보다 빠릅니다.\n"));
+            return;
+        }
+
+        //동일 시간 확인하기
+        if (check_start == check_end) {
+            if (QMessageBox::question(this,
+                                      tr("확인 필요"),
+                                      tr("시작과 종료 시간이 같습니다. 저장하시겠습니까?"),
+                                      QMessageBox::Yes | QMessageBox::No)
+                == QMessageBox::No) {
+                return;
+            }
+        }
+
+
     schedule.title = ui->lineEditTitle->text();
     schedule.location = ui->lineEditLocation->text();
 

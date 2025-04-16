@@ -7,6 +7,7 @@
 
 #include <QPushButton>
 #include <QDebug>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,6 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
     // 현재 달을 1일로 설정
     currentMonth.setDate(currentMonth.year(), currentMonth.month(), 1);
 
+    QIcon leftArrow(":/icon/icon/left_icon.png");
+    QIcon rightArrow(":/icon/icon/right_icon.png");
+    ui->shift_left->setIcon(leftArrow);
+    ui->shift_right->setIcon(rightArrow);
+    ui->shift_left->setIconSize(QSize(32, 32));
+    ui->shift_right->setIconSize(QSize(32, 32));
+    ui->shift_left->setFixedSize(40, 40);
+    ui->shift_right->setFixedSize(40, 40);
+    if (leftArrow.isNull()) {
+        qDebug() << "왼쪽 아이콘 로딩 실패!";
+    }
+    if (rightArrow.isNull()) {
+        qDebug() << "오른쪽 아이콘 로딩 실패!";
+    }
     connect(ui->shift_left, &QPushButton::clicked, this, &MainWindow::onShiftLeftClicked);
     connect(ui->shift_right, &QPushButton::clicked, this, &MainWindow::onShiftRightClicked);
 
