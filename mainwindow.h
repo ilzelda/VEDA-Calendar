@@ -24,7 +24,6 @@ public:
     void deleteSchedule(Schedule oldSch);
     void updateScheduleInMap(Schedule oldSch, Schedule newSch, QDate d);
 
-    void deleteSchedule(Schedule newSchedule);
     void addSchedule(Schedule newSchedule);
 
 private slots:
