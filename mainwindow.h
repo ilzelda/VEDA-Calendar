@@ -5,6 +5,9 @@
 #include <QDate>
 #include <QMap>
 #include <QList>
+#include <QMenuBar>
+#include <QMessageBox>
+
 #include "Schedule.h"
 #include "weekbox.h"
 
@@ -23,8 +26,8 @@ public:
     Schedule showScheduleDialogForUpdate(QWidget *parent, Schedule _sch);
     void deleteSchedule(Schedule oldSch);
     void updateScheduleInMap(Schedule oldSch, Schedule newSch, QDate d);
-
     void addSchedule(Schedule newSchedule);
+    void searchSchedule();
 
 private slots:
     void onShiftLeftClicked();
@@ -38,11 +41,13 @@ private slots:
     //void showScheduleDialogForUpdate(QWidget *parent, Schedule _sch);
 private:
     void updateCalendar();
+    bool isScheduleSame(Schedule sch1, Schedule sch2);
 
     Ui::MainWindow *ui;
+    QMenuBar *menubar;
+
     QDate currentMonth;                // 현재 표시 중인 달 (매월 1일로 설정)
     QList<WeekBox*> weekbox_list;
-
 protected:
     void showEvent(QShowEvent*) override;
     void resizeEvent(QResizeEvent*) override;
