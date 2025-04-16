@@ -10,4 +10,6 @@ struct Schedule {
     QDateTime start;
     QDateTime end;
 };
+
+
 #endif // SCHEDULE_H
