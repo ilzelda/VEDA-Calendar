@@ -36,6 +36,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         weekbox.h weekbox.cpp weekbox.ui
         Schedule.h
         searchdialog.h searchdialog.cpp searchdialog.ui
+        resources.qrc
 
 
 
